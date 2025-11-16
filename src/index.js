@@ -1,10 +1,22 @@
 require('dotenv').config();
 const express = require('express');
-const { poolPromise } = require('./config/db');
+const cors = require('cors');
+const {poolPromise} = require('./controllers/userController');
+const authRoutes = require('./routes/authRoutes');
+
+
+
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
+// 🔧 Middleware
+app.use(cors());
+app.use(express.json());
+
+
+
+// 🧪 Kiểm tra kết nối DB
 app.get('/test-db', async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -15,6 +27,12 @@ app.get('/test-db', async (req, res) => {
     }
 });
 
+app.use(express.json()); // xử lý JSON
+app.use(express.urlencoded({ extended: true })); // xử lý form-urlencoded
+// 🔐 Route xác thực người dùng
+app.use('/api/auth', authRoutes);
+
+// 🚀 Khởi động server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });
